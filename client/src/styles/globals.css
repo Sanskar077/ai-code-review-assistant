@@ -1,0 +1,119 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --font-display: ui-sans-serif, system-ui, sans-serif;
+  --font-sans: ui-sans-serif, system-ui, sans-serif;
+  --font-mono: ui-monospace, "SF Mono", Menlo, monospace;
+}
+
+@layer base {
+  :root {
+    --background: 220 20% 97%;
+    --foreground: 222 20% 12%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 222 20% 12%;
+
+    --muted: 220 16% 93%;
+    --muted-foreground: 222 10% 40%;
+
+    --primary: 38 82% 52%;
+    --primary-foreground: 222 20% 9%;
+
+    --secondary: 220 16% 90%;
+    --secondary-foreground: 222 20% 12%;
+
+    --accent: 220 16% 90%;
+    --accent-foreground: 222 20% 12%;
+
+    --destructive: 4 70% 50%;
+    --destructive-foreground: 0 0% 100%;
+
+    --success: 158 45% 38%;
+    --success-foreground: 0 0% 100%;
+
+    --border: 220 14% 88%;
+    --input: 220 14% 88%;
+    --ring: 38 82% 52%;
+
+    --diff-add: 158 45% 38%;
+    --diff-remove: 4 70% 50%;
+    --diff-add-bg: 158 40% 92%;
+    --diff-remove-bg: 4 50% 94%;
+
+    --radius: 0.75rem;
+  }
+
+  .dark {
+    --background: 222 20% 9%;
+    --foreground: 220 20% 92%;
+
+    --card: 222 18% 13%;
+    --card-foreground: 220 20% 92%;
+
+    --muted: 222 14% 18%;
+    --muted-foreground: 220 10% 62%;
+
+    --primary: 38 82% 62%;
+    --primary-foreground: 222 20% 9%;
+
+    --secondary: 222 14% 20%;
+    --secondary-foreground: 220 20% 92%;
+
+    --accent: 222 14% 22%;
+    --accent-foreground: 220 20% 92%;
+
+    --destructive: 4 78% 65%;
+    --destructive-foreground: 0 0% 100%;
+
+    --success: 158 58% 55%;
+    --success-foreground: 222 20% 9%;
+
+    --border: 222 14% 20%;
+    --input: 222 14% 20%;
+    --ring: 38 82% 62%;
+
+    --diff-add: 158 58% 55%;
+    --diff-remove: 4 78% 65%;
+    --diff-add-bg: 158 40% 16%;
+    --diff-remove-bg: 4 40% 18%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+  }
+
+  /* Visible keyboard focus everywhere — never suppressed. */
+  :focus-visible {
+    @apply outline-none ring-2 ring-ring ring-offset-2 ring-offset-background;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.001ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.001ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}
