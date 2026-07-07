@@ -9,6 +9,11 @@ export const ROUTES = {
   register: "/register",
   forgotPassword: "/forgot-password",
   dashboard: "/dashboard",
+  profile: "/dashboard/profile",
+  newReview: "/dashboard/new-review",
+  reviewHistory: "/dashboard/history",
+  uploadFile: "/dashboard/new-review",
+  settings: "/dashboard/settings",
   unauthorized: "/unauthorized",
 } as const;
 
