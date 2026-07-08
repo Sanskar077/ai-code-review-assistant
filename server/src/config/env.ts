@@ -11,6 +11,8 @@ const envSchema = z.object({
   JWT_EXPIRES_IN: z.string().default("7d"),
   COOKIE_NAME: z.string().default("acr_token"),
   CLIENT_URL: z.string().url().default("http://localhost:3000"),
+  UPLOAD_DIR: z.string().default("uploads"),
+  MAX_UPLOAD_SIZE_MB: z.coerce.number().int().positive().default(10),
 });
 
 const parsed = envSchema.safeParse(process.env);

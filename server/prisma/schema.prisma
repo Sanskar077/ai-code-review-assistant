@@ -70,12 +70,15 @@ model Finding {
 }
 
 model CodeSubmission {
-  id         String   @id @default(cuid())
-  reviewId   String
-  sourceCode String
-  fileName   String?
-  language   String
-  createdAt  DateTime @default(now())
+  id          String   @id @default(cuid())
+  reviewId    String
+  sourceCode  String
+  fileName    String?
+  /// Relative path under the server's upload directory, set only when this
+  /// submission came from a file upload (null for pasted code).
+  storagePath String?
+  language    String
+  createdAt   DateTime @default(now())
 
   review Review @relation(fields: [reviewId], references: [id], onDelete: Cascade)
 

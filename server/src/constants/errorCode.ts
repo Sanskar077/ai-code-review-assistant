@@ -9,6 +9,10 @@ export const ErrorCode = {
   NOT_FOUND: "NOT_FOUND",
   RATE_LIMIT_EXCEEDED: "RATE_LIMIT_EXCEEDED",
   INTERNAL_ERROR: "INTERNAL_ERROR",
+  FILE_TOO_LARGE: "FILE_TOO_LARGE",
+  UNSUPPORTED_FILE_TYPE: "UNSUPPORTED_FILE_TYPE",
+  EMPTY_FILE: "EMPTY_FILE",
+  FILE_REQUIRED: "FILE_REQUIRED",
 } as const;
 
 export type ErrorCodeType = (typeof ErrorCode)[keyof typeof ErrorCode];
