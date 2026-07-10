@@ -5,6 +5,7 @@ import { ErrorCode } from "../constants/errorCode";
 import { HttpStatus } from "../constants/httpStatus";
 import { UPLOAD_DIR } from "../middleware/upload.middleware";
 import { reviewRepository } from "../repositories/review.repository";
+import { analysisService } from "./analysis.service";
 import { AppError } from "../utils/AppError";
 import { createReviewMetaSchema, type CreateReviewFromPasteInput } from "../validators/review.validator";
 
@@ -17,14 +18,41 @@ async function deleteUploadedFileSafely(filePath: string) {
   }
 }
 
+/**
+ * Runs static analysis for a just-created review and folds the outcome
+ * into the object returned to the client, so the API response always
+ * reflects the final analysisStatus/analysisError/findings in one
+ * round-trip rather than requiring the frontend to poll a second endpoint.
+ */
+async function withAnalysis<T extends { id: string; language: string; submissions: { sourceCode: string; fileName: string | null }[] }>(
+  review: T
+) {
+  const submission = review.submissions[0];
+  const outcome = await analysisService.runForReview({
+    reviewId: review.id,
+    language: review.language,
+    sourceCode: submission.sourceCode,
+    fileName: submission.fileName,
+  });
+
+  return {
+    ...review,
+    analysisStatus: outcome.status,
+    analysisError: outcome.error,
+    findings: outcome.findings,
+  };
+}
+
 export const reviewService = {
   async createFromPaste(userId: string, input: CreateReviewFromPasteInput) {
-    return reviewRepository.createWithSubmission({
+    const review = await reviewRepository.createWithSubmission({
       userId,
       title: input.title,
       language: input.language,
       sourceCode: input.sourceCode,
     });
+
+    return withAnalysis(review);
   },
 
   async createFromUpload(userId: string, rawMeta: unknown, file: Express.Multer.File | undefined) {
@@ -59,7 +87,7 @@ export const reviewService = {
 
       const storagePath = path.relative(UPLOAD_DIR, file.path);
 
-      return await reviewRepository.createWithSubmission({
+      const review = await reviewRepository.createWithSubmission({
         userId,
         title: meta.title,
         language: meta.language,
@@ -67,6 +95,8 @@ export const reviewService = {
         fileName: file.originalname,
         storagePath,
       });
+
+      return withAnalysis(review);
     } catch (error) {
       await deleteUploadedFileSafely(file.path);
       throw error;

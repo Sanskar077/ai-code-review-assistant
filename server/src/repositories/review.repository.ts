@@ -1,3 +1,5 @@
+import { AnalysisStatus } from "@prisma/client";
+
 import { prisma } from "../database/prisma";
 
 export interface CreateReviewWithSubmissionInput {
@@ -28,6 +30,13 @@ export const reviewRepository = {
       include: {
         submissions: true,
       },
+    });
+  },
+
+  async updateAnalysisStatus(reviewId: string, status: AnalysisStatus, analysisError?: string | null) {
+    return prisma.review.update({
+      where: { id: reviewId },
+      data: { analysisStatus: status, analysisError: analysisError ?? null },
     });
   },
 };

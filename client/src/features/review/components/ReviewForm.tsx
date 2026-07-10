@@ -1,32 +1,33 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import * as React from "react";
 import { Controller, useForm } from "react-hook-form";
 
+import { AnalysisStatusBanner } from "@/components/review/AnalysisStatusBanner";
 import { CodeEditor } from "@/components/review/CodeEditor";
 import { FileUploader } from "@/components/review/FileUploader";
+import { FindingsList } from "@/components/review/FindingsList";
 import { LanguageSelector } from "@/components/review/LanguageSelector";
 import { ReviewTitleInput } from "@/components/review/ReviewTitleInput";
 import { SubmissionMethodToggle } from "@/components/review/SubmissionMethodToggle";
 import { SubmitReviewButton } from "@/components/review/SubmitReviewButton";
 import { UploadProgress } from "@/components/review/UploadProgress";
 import { ValidationMessage } from "@/components/review/ValidationMessage";
-import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { FormField } from "@/components/forms/FormField";
-import { ROUTES } from "@/constants/routes";
 import { reviewFormSchema, type ReviewFormValues } from "@/features/review/schemas";
 import { useCreateReviewFromPaste, useCreateReviewFromUpload } from "@/features/review/hooks/use-create-review";
-import type { SubmissionMethod, SupportedLanguage } from "@/features/review/types";
+import type { Review, SubmissionMethod, SupportedLanguage } from "@/features/review/types";
 
 export function ReviewForm() {
-  const router = useRouter();
   const searchParams = useSearchParams();
   const initialMethod: SubmissionMethod = searchParams.get("method") === "upload" ? "upload" : "paste";
 
   const [uploadPercent, setUploadPercent] = React.useState(0);
-  const [submitted, setSubmitted] = React.useState(false);
+  const [completedReview, setCompletedReview] = React.useState<Review | null>(null);
 
   const createFromPaste = useCreateReviewFromPaste();
   const createFromUpload = useCreateReviewFromUpload();
@@ -38,6 +39,7 @@ export function ReviewForm() {
     handleSubmit,
     watch,
     setValue,
+    reset,
     formState: { errors },
   } = useForm<ReviewFormValues>({
     resolver: zodResolver(reviewFormSchema),
@@ -63,7 +65,7 @@ export function ReviewForm() {
           language: values.language as SupportedLanguage,
           sourceCode: values.sourceCode ?? "",
         },
-        { onSuccess: () => handleSuccess() }
+        { onSuccess: (review) => setCompletedReview(review) }
       );
     } else {
       createFromUpload.mutate(
@@ -73,27 +75,42 @@ export function ReviewForm() {
           file: values.file as File,
           onProgress: setUploadPercent,
         },
-        { onSuccess: () => handleSuccess() }
+        { onSuccess: (review) => setCompletedReview(review) }
       );
     }
   }
 
-  function handleSuccess() {
-    setSubmitted(true);
-    setTimeout(() => router.push(ROUTES.dashboard), 1600);
+  function handleSubmitAnother() {
+    setCompletedReview(null);
+    reset();
   }
 
   const submissionError = createFromPaste.error ?? createFromUpload.error;
 
-  if (submitted) {
+  // Analysis started / in progress is reflected via the submit button and
+  // upload progress bar below (isSubmitting / createFromUpload.isPending) —
+  // once the request resolves, "completed" or "failed" is shown here.
+  if (completedReview) {
     return (
-      <Card>
-        <CardContent className="flex flex-col items-center gap-3 py-16 text-center">
-          <ValidationMessage variant="success" className="text-base">
-            Review submitted successfully — taking you to your dashboard…
-          </ValidationMessage>
-        </CardContent>
-      </Card>
+      <div className="space-y-6">
+        <AnalysisStatusBanner
+          status={completedReview.analysisStatus}
+          error={completedReview.analysisError}
+          findingCount={completedReview.findings.length}
+        />
+
+        <Card>
+          <CardHeader className="flex-row items-center justify-between space-y-0">
+            <CardTitle className="text-base">{completedReview.title}</CardTitle>
+            <Button variant="outline" size="sm" onClick={handleSubmitAnother}>
+              Submit another review
+            </Button>
+          </CardHeader>
+          <CardContent>
+            <FindingsList findings={completedReview.findings} />
+          </CardContent>
+        </Card>
+      </div>
     );
   }
 
@@ -176,7 +193,11 @@ export function ReviewForm() {
       </Card>
 
       <div className="flex justify-end">
-        <SubmitReviewButton loading={isSubmitting} size="lg" />
+        <SubmitReviewButton
+          loading={isSubmitting}
+          loadingLabel="Analyzing your code…"
+          size="lg"
+        />
       </div>
     </form>
   );

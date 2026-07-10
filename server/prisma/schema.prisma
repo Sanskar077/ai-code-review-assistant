@@ -20,6 +20,13 @@ enum Severity {
   CRITICAL
 }
 
+enum AnalysisStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  FAILED
+}
+
 model User {
   id        String   @id @default(cuid())
   name      String
@@ -34,14 +41,18 @@ model User {
 }
 
 model Review {
-  id           String   @id @default(cuid())
-  userId       String
-  title        String
-  language     String
-  overallScore Int?
-  aiSummary    String?
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  id             String         @id @default(cuid())
+  userId         String
+  title          String
+  language       String
+  overallScore   Int?
+  aiSummary      String?
+  analysisStatus AnalysisStatus @default(PENDING)
+  /// Sanitized, user-safe message set only when analysisStatus is FAILED.
+  /// Never the raw error/stack trace — see analyzer error handling.
+  analysisError  String?
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
 
   user        User             @relation(fields: [userId], references: [id], onDelete: Cascade)
   findings    Finding[]
@@ -55,11 +66,18 @@ model Finding {
   id           String   @id @default(cuid())
   reviewId     String
   severity     Severity
+  /// Human-readable origin of this finding, e.g. "ESLint", "Pylint" (Day 6),
+  /// or an AI-review category in a future milestone.
   category     String
+  /// Rule identifier (ESLint ruleId / Pylint symbol), e.g. "no-unused-vars".
   issue        String
+  /// The analyzer's descriptive message for this finding.
   explanation  String
   suggestedFix String?
   lineNumber   Int?
+  /// Column position is nullable because not every analyzer/message
+  /// includes one (e.g. some Pylint message types are line-only).
+  column       Int?
   fileName     String?
   createdAt    DateTime @default(now())
 
