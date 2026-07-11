@@ -77,6 +77,7 @@ export const analysisService = {
           lineNumber: f.line,
           column: f.column,
           fileName: f.fileName,
+          source: result.source,
         }))
       );
 

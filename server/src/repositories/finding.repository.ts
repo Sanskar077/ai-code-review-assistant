@@ -12,6 +12,7 @@ export interface CreateFindingInput {
   lineNumber: number | null;
   column: number | null;
   fileName: string | null;
+  source: string | null;
 }
 
 export const findingRepository = {
@@ -31,6 +32,7 @@ export const findingRepository = {
             lineNumber: input.lineNumber,
             column: input.column,
             fileName: input.fileName,
+            source: input.source,
           },
         })
       )

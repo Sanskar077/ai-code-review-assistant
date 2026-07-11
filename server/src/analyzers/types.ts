@@ -28,6 +28,8 @@ export interface AnalyzerFinding {
 export interface AnalyzerResult {
   /** Human-readable name of the tool that produced these findings, e.g. "ESLint", "Pylint". Stored as Finding.category. */
   analyzerName: string;
+  /** Machine-readable identifier, e.g. "eslint", "pylint". Stored as Finding.source. */
+  source: string;
   findings: AnalyzerFinding[];
 }
 
@@ -45,5 +47,7 @@ export interface AnalyzerInput {
 export interface CodeAnalyzer {
   readonly language: string;
   readonly name: string;
+  /** Machine-readable identifier used for Finding.source, e.g. "eslint", "pylint". */
+  readonly source: string;
   analyze(input: AnalyzerInput): Promise<AnalyzerResult>;
 }

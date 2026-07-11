@@ -5,6 +5,7 @@ import { ErrorCode } from "../constants/errorCode";
 import { HttpStatus } from "../constants/httpStatus";
 import { UPLOAD_DIR } from "../middleware/upload.middleware";
 import { reviewRepository } from "../repositories/review.repository";
+import { aiReviewService } from "./ai-review.service";
 import { analysisService } from "./analysis.service";
 import { AppError } from "../utils/AppError";
 import { createReviewMetaSchema, type CreateReviewFromPasteInput } from "../validators/review.validator";
@@ -19,27 +20,43 @@ async function deleteUploadedFileSafely(filePath: string) {
 }
 
 /**
- * Runs static analysis for a just-created review and folds the outcome
- * into the object returned to the client, so the API response always
- * reflects the final analysisStatus/analysisError/findings in one
- * round-trip rather than requiring the frontend to poll a second endpoint.
+ * Runs the full review pipeline for a just-created review — static
+ * analysis, then AI review (static analysis always completes first, per
+ * spec) — and folds both outcomes into the object returned to the client,
+ * so the API response reflects final status/findings from both stages in
+ * one round-trip rather than requiring the frontend to poll.
+ *
+ * AI review runs regardless of whether static analysis succeeded: they
+ * analyze the same source independently, so a static-analysis failure
+ * shouldn't also deny the user an AI review (and vice versa).
  */
-async function withAnalysis<T extends { id: string; language: string; submissions: { sourceCode: string; fileName: string | null }[] }>(
-  review: T
-) {
+async function withReviewPipeline<
+  T extends { id: string; language: string; submissions: { sourceCode: string; fileName: string | null }[] }
+>(review: T) {
   const submission = review.submissions[0];
-  const outcome = await analysisService.runForReview({
+
+  const analysisOutcome = await analysisService.runForReview({
     reviewId: review.id,
     language: review.language,
     sourceCode: submission.sourceCode,
     fileName: submission.fileName,
   });
 
+  const aiOutcome = await aiReviewService.runForReview({
+    reviewId: review.id,
+    language: review.language,
+    sourceCode: submission.sourceCode,
+  });
+
   return {
     ...review,
-    analysisStatus: outcome.status,
-    analysisError: outcome.error,
-    findings: outcome.findings,
+    analysisStatus: analysisOutcome.status,
+    analysisError: analysisOutcome.error,
+    aiReviewStatus: aiOutcome.status,
+    aiReviewError: aiOutcome.error,
+    aiSummary: aiOutcome.summary,
+    // Merged so the frontend consumes one unified findings list, as required.
+    findings: [...analysisOutcome.findings, ...aiOutcome.findings],
   };
 }
 
@@ -52,7 +69,7 @@ export const reviewService = {
       sourceCode: input.sourceCode,
     });
 
-    return withAnalysis(review);
+    return withReviewPipeline(review);
   },
 
   async createFromUpload(userId: string, rawMeta: unknown, file: Express.Multer.File | undefined) {
@@ -96,7 +113,7 @@ export const reviewService = {
         storagePath,
       });
 
-      return withAnalysis(review);
+      return withReviewPipeline(review);
     } catch (error) {
       await deleteUploadedFileSafely(file.path);
       throw error;

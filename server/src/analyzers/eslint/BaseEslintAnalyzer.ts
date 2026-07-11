@@ -6,6 +6,7 @@ import type { AnalyzerFinding, AnalyzerInput, AnalyzerResult, CodeAnalyzer } fro
 export abstract class BaseEslintAnalyzer implements CodeAnalyzer {
   abstract readonly language: string;
   abstract readonly name: string;
+  abstract readonly source: string;
 
   /** The virtual filename ESLint uses to decide parser/rules — never written to disk. */
   protected abstract readonly virtualFileName: string;
@@ -38,6 +39,6 @@ export abstract class BaseEslintAnalyzer implements CodeAnalyzer {
       }))
     );
 
-    return { analyzerName: this.name, findings };
+    return { analyzerName: this.name, source: this.source, findings };
   }
 }

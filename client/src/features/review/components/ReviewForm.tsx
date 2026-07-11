@@ -5,6 +5,7 @@ import { useSearchParams } from "next/navigation";
 import * as React from "react";
 import { Controller, useForm } from "react-hook-form";
 
+import { AIReviewSummary } from "@/components/review/AIReviewSummary";
 import { AnalysisStatusBanner } from "@/components/review/AnalysisStatusBanner";
 import { CodeEditor } from "@/components/review/CodeEditor";
 import { FileUploader } from "@/components/review/FileUploader";
@@ -97,6 +98,12 @@ export function ReviewForm() {
           status={completedReview.analysisStatus}
           error={completedReview.analysisError}
           findingCount={completedReview.findings.length}
+        />
+
+        <AIReviewSummary
+          status={completedReview.aiReviewStatus}
+          summary={completedReview.aiSummary}
+          error={completedReview.aiReviewError}
         />
 
         <Card>
@@ -195,7 +202,7 @@ export function ReviewForm() {
       <div className="flex justify-end">
         <SubmitReviewButton
           loading={isSubmitting}
-          loadingLabel="Analyzing your code…"
+          loadingLabel="Running static analysis & AI review…"
           size="lg"
         />
       </div>

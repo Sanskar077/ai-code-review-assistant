@@ -5,6 +5,7 @@ import { BaseEslintAnalyzer } from "./BaseEslintAnalyzer";
 export class TypeScriptAnalyzer extends BaseEslintAnalyzer {
   readonly language = "typescript";
   readonly name = "ESLint (TypeScript)";
+  readonly source = "eslint";
   protected readonly virtualFileName = "submission.ts";
 
   protected buildConfig(): Linter.Config {

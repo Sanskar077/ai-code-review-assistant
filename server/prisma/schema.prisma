@@ -27,6 +27,16 @@ enum AnalysisStatus {
   FAILED
 }
 
+enum AIReviewStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  FAILED
+  /// AI review was not attempted because no provider API key is configured —
+  /// distinct from FAILED, which means a configured provider call failed.
+  SKIPPED
+}
+
 model User {
   id        String   @id @default(cuid())
   name      String
@@ -51,8 +61,18 @@ model Review {
   /// Sanitized, user-safe message set only when analysisStatus is FAILED.
   /// Never the raw error/stack trace — see analyzer error handling.
   analysisError  String?
-  createdAt      DateTime       @default(now())
-  updatedAt      DateTime       @updatedAt
+
+  aiReviewStatus      AIReviewStatus @default(PENDING)
+  /// Sanitized, user-safe message set only when aiReviewStatus is FAILED.
+  aiReviewError        String?
+  aiProvider           String?
+  aiModel              String?
+  aiProcessingTimeMs   Int?
+  aiPromptTokens       Int?
+  aiCompletionTokens   Int?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   user        User             @relation(fields: [userId], references: [id], onDelete: Cascade)
   findings    Finding[]
@@ -66,19 +86,25 @@ model Finding {
   id           String   @id @default(cuid())
   reviewId     String
   severity     Severity
-  /// Human-readable origin of this finding, e.g. "ESLint", "Pylint" (Day 6),
-  /// or an AI-review category in a future milestone.
+  /// Human-readable origin of this finding, e.g. "ESLint", "Pylint", or an
+  /// AI-review category (e.g. "Security", "Performance") from Day 7.
   category     String
-  /// Rule identifier (ESLint ruleId / Pylint symbol), e.g. "no-unused-vars".
+  /// Rule identifier (ESLint ruleId / Pylint symbol) for static findings,
+  /// or the AI's finding title for AI-review findings.
   issue        String
-  /// The analyzer's descriptive message for this finding.
+  /// The analyzer's descriptive message, or the AI's finding description.
   explanation  String
+  /// The analyzer's suggested fix, or the AI's recommendation.
   suggestedFix String?
   lineNumber   Int?
   /// Column position is nullable because not every analyzer/message
-  /// includes one (e.g. some Pylint message types are line-only).
+  /// includes one (e.g. some Pylint message types are line-only), and AI
+  /// findings are not tied to a specific position at all.
   column       Int?
   fileName     String?
+  /// Which engine produced this finding: "eslint" | "pylint" | "ai".
+  /// Nullable so existing Day 6 rows (predating this column) remain valid.
+  source       String?
   createdAt    DateTime @default(now())
 
   review Review @relation(fields: [reviewId], references: [id], onDelete: Cascade)

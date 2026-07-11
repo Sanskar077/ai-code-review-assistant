@@ -5,6 +5,7 @@ import { BaseEslintAnalyzer } from "./BaseEslintAnalyzer";
 export class JavaScriptAnalyzer extends BaseEslintAnalyzer {
   readonly language = "javascript";
   readonly name = "ESLint";
+  readonly source = "eslint";
   protected readonly virtualFileName = "submission.js";
 
   protected buildConfig(): Linter.Config {

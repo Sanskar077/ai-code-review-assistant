@@ -13,6 +13,13 @@ const envSchema = z.object({
   CLIENT_URL: z.string().url().default("http://localhost:3000"),
   UPLOAD_DIR: z.string().default("uploads"),
   MAX_UPLOAD_SIZE_MB: z.coerce.number().int().positive().default(10),
+  // Optional by design: AI review must degrade gracefully (SKIPPED status)
+  // when unset, not prevent the server from starting.
+  OPENROUTER_API_KEY: z.string().optional(),
+  OPENROUTER_MODEL: z.string().default("meta-llama/llama-3.3-70b-instruct:free"),
+  OPENROUTER_BASE_URL: z.string().url().default("https://openrouter.ai/api/v1"),
+  AI_REVIEW_TIMEOUT_MS: z.coerce.number().int().positive().default(30_000),
+  AI_MAX_SOURCE_CHARS: z.coerce.number().int().positive().default(20_000),
 });
 
 const parsed = envSchema.safeParse(process.env);

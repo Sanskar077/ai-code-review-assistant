@@ -21,6 +21,7 @@ const MAX_BUFFER_BYTES = 5 * 1024 * 1024;
 export class PythonAnalyzer implements CodeAnalyzer {
   readonly language = "python";
   readonly name = "Pylint";
+  readonly source = "pylint";
 
   async analyze({ sourceCode, fileName }: AnalyzerInput): Promise<AnalyzerResult> {
     const messages = await withTempFile(sourceCode, ".py", async (filePath) => {
@@ -51,6 +52,6 @@ export class PythonAnalyzer implements CodeAnalyzer {
       suggestedFix: null, // Pylint's JSON output doesn't include fix suggestions
     }));
 
-    return { analyzerName: this.name, findings };
+    return { analyzerName: this.name, source: this.source, findings };
   }
 }
