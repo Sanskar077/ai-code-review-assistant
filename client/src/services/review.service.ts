@@ -18,6 +18,11 @@ export interface CreateReviewFromUploadPayload {
 }
 
 export const reviewService = {
+  async getById(id: string): Promise<Review> {
+    const { data } = await apiClient.get<ApiSuccess<{ review: Review }>>(`/v1/reviews/${id}`);
+    return data.data.review;
+  },
+
   async createFromPaste(payload: CreateReviewFromPastePayload): Promise<Review> {
     const { data } = await apiClient.post<ApiSuccess<{ review: Review }>>("/v1/reviews", payload);
     return data.data.review;

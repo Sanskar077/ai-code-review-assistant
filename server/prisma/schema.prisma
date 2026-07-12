@@ -61,6 +61,10 @@ model Review {
   /// Sanitized, user-safe message set only when analysisStatus is FAILED.
   /// Never the raw error/stack trace — see analyzer error handling.
   analysisError  String?
+  /// Wall-clock time the static analyzer took, in milliseconds. This value
+  /// was already being computed in analysis.service.ts (and logged) since
+  /// Day 6 — this just persists it so it can be displayed.
+  analysisProcessingTimeMs Int?
 
   aiReviewStatus      AIReviewStatus @default(PENDING)
   /// Sanitized, user-safe message set only when aiReviewStatus is FAILED.

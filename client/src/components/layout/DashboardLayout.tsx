@@ -3,6 +3,7 @@ import * as React from "react";
 import { DashboardFooter } from "@/components/layout/DashboardFooter";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { TopNavbar } from "@/components/layout/TopNavbar";
+import { BreadcrumbLabelProvider } from "@/lib/breadcrumb-context";
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -15,13 +16,15 @@ interface DashboardLayoutProps {
  */
 export function DashboardLayout({ children }: DashboardLayoutProps) {
   return (
-    <div className="flex min-h-screen">
-      <Sidebar />
-      <div className="flex min-h-screen flex-1 flex-col">
-        <TopNavbar />
-        <main className="flex-1 px-4 py-6 sm:px-6 sm:py-8">{children}</main>
-        <DashboardFooter />
+    <BreadcrumbLabelProvider>
+      <div className="flex min-h-screen">
+        <Sidebar />
+        <div className="flex min-h-screen flex-1 flex-col">
+          <TopNavbar />
+          <main className="flex-1 px-4 py-6 sm:px-6 sm:py-8">{children}</main>
+          <DashboardFooter />
+        </div>
       </div>
-    </div>
+    </BreadcrumbLabelProvider>
   );
 }

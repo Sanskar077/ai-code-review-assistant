@@ -81,7 +81,7 @@ export const analysisService = {
         }))
       );
 
-      await reviewRepository.updateAnalysisStatus(reviewId, AnalysisStatus.COMPLETED);
+      await reviewRepository.updateAnalysisStatus(reviewId, AnalysisStatus.COMPLETED, null, durationMs);
       return { status: AnalysisStatus.COMPLETED, error: null, findings };
     } catch (error) {
       const durationMs = Date.now() - startedAt;

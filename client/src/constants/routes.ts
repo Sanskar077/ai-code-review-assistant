@@ -15,6 +15,8 @@ export const ROUTES = {
   uploadFile: "/dashboard/new-review",
   settings: "/dashboard/settings",
   unauthorized: "/unauthorized",
+  /** Builds the path to a single review's detail page. */
+  reviewDetail: (reviewId: string) => `/dashboard/reviews/${reviewId}`,
 } as const;
 
 /** Routes that only make sense for a signed-out visitor. */

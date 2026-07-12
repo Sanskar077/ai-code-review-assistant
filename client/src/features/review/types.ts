@@ -52,8 +52,14 @@ export interface Review {
   aiSummary: string | null;
   analysisStatus: AnalysisStatus;
   analysisError: string | null;
+  analysisProcessingTimeMs: number | null;
   aiReviewStatus: AIReviewStatus;
   aiReviewError: string | null;
+  aiProvider: string | null;
+  aiModel: string | null;
+  aiProcessingTimeMs: number | null;
+  aiPromptTokens: number | null;
+  aiCompletionTokens: number | null;
   createdAt: string;
   updatedAt: string;
   submissions: CodeSubmission[];

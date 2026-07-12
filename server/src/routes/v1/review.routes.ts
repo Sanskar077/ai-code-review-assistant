@@ -8,6 +8,8 @@ import { createReviewFromPasteSchema } from "../../validators/review.validator";
 
 const router = Router();
 
+router.get("/:id", authenticate, reviewController.getById);
+
 router.post("/", authenticate, validate(createReviewFromPasteSchema), reviewController.createFromPaste);
 
 // Meta fields (title, language) are validated inside reviewService.createFromUpload

@@ -6,6 +6,11 @@ import { asyncHandler } from "../utils/asyncHandler";
 import type { CreateReviewFromPasteInput } from "../validators/review.validator";
 
 export const reviewController = {
+  getById: asyncHandler(async (req: Request, res: Response) => {
+    const review = await reviewService.getById(req.user!.id, req.params.id);
+    res.status(HttpStatus.OK).json({ success: true, data: { review } });
+  }),
+
   createFromPaste: asyncHandler(async (req: Request, res: Response) => {
     const input = req.body as CreateReviewFromPasteInput;
     const review = await reviewService.createFromPaste(req.user!.id, input);

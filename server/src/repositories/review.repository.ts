@@ -44,10 +44,19 @@ export const reviewRepository = {
     });
   },
 
-  async updateAnalysisStatus(reviewId: string, status: AnalysisStatus, analysisError?: string | null) {
+  async updateAnalysisStatus(
+    reviewId: string,
+    status: AnalysisStatus,
+    analysisError?: string | null,
+    processingTimeMs?: number | null
+  ) {
     return prisma.review.update({
       where: { id: reviewId },
-      data: { analysisStatus: status, analysisError: analysisError ?? null },
+      data: {
+        analysisStatus: status,
+        analysisError: analysisError ?? null,
+        ...(processingTimeMs !== undefined ? { analysisProcessingTimeMs: processingTimeMs } : {}),
+      },
     });
   },
 
@@ -63,6 +72,17 @@ export const reviewRepository = {
         aiProcessingTimeMs: data.processingTimeMs ?? null,
         aiPromptTokens: data.promptTokens ?? null,
         aiCompletionTokens: data.completionTokens ?? null,
+      },
+    });
+  },
+
+  /** Scoped to the owning user — a review that exists but belongs to someone else is treated identically to "doesn't exist" (returns null either way), avoiding IDOR enumeration. */
+  async findByIdForUser(reviewId: string, userId: string) {
+    return prisma.review.findFirst({
+      where: { id: reviewId, userId },
+      include: {
+        submissions: true,
+        findings: { orderBy: [{ severity: "desc" }, { lineNumber: "asc" }] },
       },
     });
   },

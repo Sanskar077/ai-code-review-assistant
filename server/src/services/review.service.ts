@@ -61,6 +61,14 @@ async function withReviewPipeline<
 }
 
 export const reviewService = {
+  async getById(userId: string, reviewId: string) {
+    const review = await reviewRepository.findByIdForUser(reviewId, userId);
+    if (!review) {
+      throw new AppError("Review not found", HttpStatus.NOT_FOUND, ErrorCode.NOT_FOUND);
+    }
+    return review;
+  },
+
   async createFromPaste(userId: string, input: CreateReviewFromPasteInput) {
     const review = await reviewRepository.createWithSubmission({
       userId,

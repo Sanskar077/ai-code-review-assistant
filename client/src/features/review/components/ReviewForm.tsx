@@ -1,6 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import * as React from "react";
 import { Controller, useForm } from "react-hook-form";
@@ -19,6 +20,7 @@ import { ValidationMessage } from "@/components/review/ValidationMessage";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { FormField } from "@/components/forms/FormField";
+import { ROUTES } from "@/constants/routes";
 import { reviewFormSchema, type ReviewFormValues } from "@/features/review/schemas";
 import { useCreateReviewFromPaste, useCreateReviewFromUpload } from "@/features/review/hooks/use-create-review";
 import type { Review, SubmissionMethod, SupportedLanguage } from "@/features/review/types";
@@ -109,9 +111,14 @@ export function ReviewForm() {
         <Card>
           <CardHeader className="flex-row items-center justify-between space-y-0">
             <CardTitle className="text-base">{completedReview.title}</CardTitle>
-            <Button variant="outline" size="sm" onClick={handleSubmitAnother}>
-              Submit another review
-            </Button>
+            <div className="flex gap-2">
+              <Button variant="outline" size="sm" asChild>
+                <Link href={ROUTES.reviewDetail(completedReview.id)}>View full details</Link>
+              </Button>
+              <Button variant="outline" size="sm" onClick={handleSubmitAnother}>
+                Submit another review
+              </Button>
+            </div>
           </CardHeader>
           <CardContent>
             <FindingsList findings={completedReview.findings} />

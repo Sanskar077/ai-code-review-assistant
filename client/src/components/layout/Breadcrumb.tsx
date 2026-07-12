@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import * as React from "react";
 
 import { ROUTES } from "@/constants/routes";
+import { useBreadcrumbLabelContext } from "@/lib/breadcrumb-context";
 
 const SEGMENT_LABELS: Record<string, string> = {
   dashboard: "Dashboard",
@@ -13,16 +14,18 @@ const SEGMENT_LABELS: Record<string, string> = {
   "new-review": "New Review",
   history: "Review History",
   settings: "Settings",
+  reviews: "Reviews",
 };
 
 export function Breadcrumb() {
   const pathname = usePathname();
+  const { label: overrideLabel } = useBreadcrumbLabelContext();
   const segments = pathname.split("/").filter(Boolean);
 
   const crumbs = segments.map((segment, index) => {
     const href = "/" + segments.slice(0, index + 1).join("/");
-    const label = SEGMENT_LABELS[segment] ?? segment;
     const isLast = index === segments.length - 1;
+    const label = isLast && overrideLabel ? overrideLabel : (SEGMENT_LABELS[segment] ?? segment);
     return { href, label, isLast };
   });
 
