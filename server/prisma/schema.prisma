@@ -82,7 +82,7 @@ model Review {
   findings    Finding[]
   submissions CodeSubmission[]
 
-  @@index([userId])
+  @@index([userId, createdAt])
   @@map("reviews")
 }
 

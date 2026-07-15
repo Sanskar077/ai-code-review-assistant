@@ -29,3 +29,27 @@ export function validate(schema: ZodTypeAny) {
     next();
   };
 }
+
+/**
+ * Same pattern as validate(), for query string params instead of the body.
+ * The parsed, coerced result (e.g. page/pageSize as numbers, repeated keys
+ * normalized to arrays) is attached to res.locals.query rather than
+ * reassigned onto req.query, since Express's Request.query is typed
+ * read-only in this version and some setups make it a getter-only property
+ * at runtime.
+ */
+export function validateQuery(schema: ZodTypeAny) {
+  return (req: Request, res: Response, next: NextFunction) => {
+    const result = schema.safeParse(req.query);
+
+    if (!result.success) {
+      const details = result.error.flatten();
+      return next(
+        new AppError("Invalid query parameters", HttpStatus.UNPROCESSABLE_ENTITY, ErrorCode.VALIDATION_ERROR, details)
+      );
+    }
+
+    res.locals.query = result.data;
+    next();
+  };
+}

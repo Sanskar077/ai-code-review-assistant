@@ -9,6 +9,7 @@ import { aiReviewService } from "./ai-review.service";
 import { analysisService } from "./analysis.service";
 import { AppError } from "../utils/AppError";
 import { createReviewMetaSchema, type CreateReviewFromPasteInput } from "../validators/review.validator";
+import type { ListReviewsQuery } from "../validators/reviewQuery.validator";
 
 /** Best-effort delete — an upload that fails validation shouldn't leave an orphaned file on disk. */
 async function deleteUploadedFileSafely(filePath: string) {
@@ -17,6 +18,11 @@ async function deleteUploadedFileSafely(filePath: string) {
   } catch {
     // Nothing more we can do here; this is already inside a failure path.
   }
+}
+
+function truncate(text: string, maxLength: number): string {
+  if (text.length <= maxLength) return text;
+  return text.slice(0, maxLength - 1).trimEnd() + "…";
 }
 
 /**
@@ -61,6 +67,52 @@ async function withReviewPipeline<
 }
 
 export const reviewService = {
+  async list(userId: string, query: ListReviewsQuery) {
+    const { reviews, totalCount } = await reviewRepository.findManyForUser(userId, query);
+
+    const items = reviews.map((review: (typeof reviews)[number]) => {
+      const staticFindings = review.findings.filter((f: { source: string | null }) => f.source !== "ai").length;
+      const aiFindings = review.findings.filter((f: { source: string | null }) => f.source === "ai").length;
+      return {
+        id: review.id,
+        title: review.title,
+        language: review.language,
+        createdAt: review.createdAt,
+        analysisStatus: review.analysisStatus,
+        aiReviewStatus: review.aiReviewStatus,
+        totalFindings: staticFindings + aiFindings,
+        staticFindings,
+        aiFindings,
+        aiModel: review.aiModel,
+        aiSummaryPreview: review.aiSummary ? truncate(review.aiSummary, 160) : null,
+      };
+    });
+
+    return {
+      items,
+      pagination: {
+        page: query.page,
+        pageSize: query.pageSize,
+        totalCount,
+        totalPages: Math.max(1, Math.ceil(totalCount / query.pageSize)),
+      },
+    };
+  },
+
+  async remove(userId: string, reviewId: string) {
+    const storagePaths = await reviewRepository.deleteForUser(reviewId, userId);
+    if (storagePaths === null) {
+      throw new AppError("Review not found", HttpStatus.NOT_FOUND, ErrorCode.NOT_FOUND);
+    }
+
+    // Best-effort — the database row is already gone regardless of whether
+    // this cleanup succeeds, so a stale file on disk is not a correctness
+    // issue, just a minor cleanup miss.
+    await Promise.all(
+      storagePaths.map((relativePath: string) => deleteUploadedFileSafely(path.join(UPLOAD_DIR, relativePath)))
+    );
+  },
+
   async getById(userId: string, reviewId: string) {
     const review = await reviewRepository.findByIdForUser(reviewId, userId);
     if (!review) {

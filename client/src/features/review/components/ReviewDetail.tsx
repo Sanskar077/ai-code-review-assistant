@@ -9,7 +9,6 @@ import { FindingCard } from "@/components/review/FindingCard";
 import { FindingsFilterBar } from "@/components/review/FindingsFilterBar";
 import { ReviewDetailSkeleton } from "@/components/review/ReviewDetailSkeleton";
 import { ReviewSummaryCard } from "@/components/review/ReviewSummaryCard";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/common/EmptyState";
 import { SearchInput } from "@/components/common/SearchInput";
@@ -122,16 +121,12 @@ export function ReviewDetail({ reviewId }: ReviewDetailProps) {
             New review
           </Link>
         </Button>
-        <span
-          className="flex cursor-not-allowed items-center gap-1.5 rounded-md border border-border px-3 py-1.5 text-sm text-muted-foreground/50"
-          aria-disabled="true"
-        >
-          <History className="h-4 w-4" />
-          Review history
-          <Badge variant="secondary" className="text-[10px]">
-            Soon
-          </Badge>
-        </span>
+        <Button variant="outline" size="sm" asChild>
+          <Link href={ROUTES.reviewHistory}>
+            <History />
+            Review history
+          </Link>
+        </Button>
       </nav>
 
       <ReviewSummaryCard review={review} />
