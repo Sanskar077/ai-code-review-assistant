@@ -20,6 +20,14 @@ enum Severity {
   CRITICAL
 }
 
+enum MaintainabilityRating {
+  EXCELLENT
+  GOOD
+  FAIR
+  POOR
+  CRITICAL
+}
+
 enum AnalysisStatus {
   PENDING
   IN_PROGRESS
@@ -56,6 +64,13 @@ model Review {
   title          String
   language       String
   overallScore   Int?
+  /// Derived from CodeMetrics via quality-score.config.ts — see MetricsEngine.
+  maintainabilityRating MaintainabilityRating?
+  /// Full CodeMetrics + ComplexityMetrics + QualityScoreBreakdown (see
+  /// server/src/metrics/types.ts), stored as one JSON blob rather than ~15
+  /// individual columns — this data is always read/written as a whole unit
+  /// by the review detail page, never filtered/sorted on individually.
+  metricsJson    Json?
   aiSummary      String?
   analysisStatus AnalysisStatus @default(PENDING)
   /// Sanitized, user-safe message set only when analysisStatus is FAILED.

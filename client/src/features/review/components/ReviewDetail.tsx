@@ -15,6 +15,7 @@ import { SearchInput } from "@/components/common/SearchInput";
 import { ErrorLayout } from "@/components/layout/ErrorLayout";
 import { ROUTES } from "@/constants/routes";
 import { useReview } from "@/features/review/hooks/use-review";
+import { MetricsSection } from "@/features/metrics/components/MetricsSection";
 import { useSetBreadcrumbLabel } from "@/hooks/use-set-breadcrumb-label";
 
 interface ReviewDetailProps {
@@ -132,6 +133,12 @@ export function ReviewDetail({ reviewId }: ReviewDetailProps) {
       <ReviewSummaryCard review={review} />
 
       <AIInsightsCard review={review} />
+
+      <MetricsSection
+        overallScore={review.overallScore}
+        maintainabilityRating={review.maintainabilityRating}
+        metricsJson={review.metricsJson}
+      />
 
       <div className="space-y-4">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">

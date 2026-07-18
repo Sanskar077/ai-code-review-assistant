@@ -1,4 +1,4 @@
-import { AnalysisStatus, AIReviewStatus, Prisma } from "@prisma/client";
+import { AnalysisStatus, AIReviewStatus, MaintainabilityRating, Prisma } from "@prisma/client";
 
 import { prisma } from "../database/prisma";
 import type { ListReviewsQuery } from "../validators/reviewQuery.validator";
@@ -21,6 +21,12 @@ export interface UpdateAiReviewInput {
   processingTimeMs?: number | null;
   promptTokens?: number | null;
   completionTokens?: number | null;
+}
+
+export interface UpdateMetricsInput {
+  overallScore: number;
+  maintainabilityRating: MaintainabilityRating;
+  metricsJson: unknown;
 }
 
 function buildDateThreshold(range: ListReviewsQuery["dateRange"]): Date | null {
@@ -141,6 +147,17 @@ export const reviewRepository = {
         aiProcessingTimeMs: data.processingTimeMs ?? null,
         aiPromptTokens: data.promptTokens ?? null,
         aiCompletionTokens: data.completionTokens ?? null,
+      },
+    });
+  },
+
+  async updateMetrics(reviewId: string, data: UpdateMetricsInput) {
+    return prisma.review.update({
+      where: { id: reviewId },
+      data: {
+        overallScore: data.overallScore,
+        maintainabilityRating: data.maintainabilityRating,
+        metricsJson: data.metricsJson as Prisma.InputJsonValue,
       },
     });
   },

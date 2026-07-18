@@ -1,3 +1,5 @@
+import type { MaintainabilityRating, MetricsJson } from "@/features/metrics/types";
+
 export const SUPPORTED_LANGUAGES = ["javascript", "typescript", "python"] as const;
 export type SupportedLanguage = (typeof SUPPORTED_LANGUAGES)[number];
 
@@ -49,6 +51,8 @@ export interface Review {
   title: string;
   language: string;
   overallScore: number | null;
+  maintainabilityRating: MaintainabilityRating | null;
+  metricsJson: MetricsJson | null;
   aiSummary: string | null;
   analysisStatus: AnalysisStatus;
   analysisError: string | null;
