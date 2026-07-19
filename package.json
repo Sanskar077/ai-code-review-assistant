@@ -1,0 +1,6 @@
+{
+  "name": "ai-code-review-assistant",
+  "version": "0.1.0",
+  "private": true,
+  "description": "AI Code Review Assistant monorepo (client + server)"
+}
