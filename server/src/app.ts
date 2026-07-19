@@ -16,7 +16,10 @@ const app = express();
 app.set("trust proxy", 1);
 
 app.use(helmet());
-app.use(cors({ origin: env.CLIENT_URL, credentials: true }));
+// Trim any trailing slash so a Render env var like ".../vercel.app/"
+// still matches the browser's Origin header (".../vercel.app", no slash).
+const allowedOrigin = env.CLIENT_URL.replace(/\/+$/, "");
+app.use(cors({ origin: allowedOrigin, credentials: true }));
 app.use(cookieParser());
 app.use(express.json({ limit: "2mb" }));
 app.use(express.urlencoded({ extended: true }));
