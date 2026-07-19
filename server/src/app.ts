@@ -10,6 +10,11 @@ import routes from "./routes";
 
 const app = express();
 
+// Render (and most PaaS hosts) put the app behind a reverse proxy. Without
+// this, express-rate-limit throws (it can't trust X-Forwarded-For) and
+// req.secure / cookie "secure" detection can misbehave.
+app.set("trust proxy", 1);
+
 app.use(helmet());
 app.use(cors({ origin: env.CLIENT_URL, credentials: true }));
 app.use(cookieParser());
