@@ -1,6 +1,21 @@
 {
   "name": "ai-code-review-assistant",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "private": true,
-  "description": "AI Code Review Assistant monorepo (client + server)"
+  "description": "AI Code Review Assistant Monorepo",
+  "workspaces": [
+    "client",
+    "server"
+  ],
+  "scripts": {
+    "dev:client": "npm --prefix client run dev",
+    "dev:server": "npm --prefix server run dev",
+    "build:client": "npm --prefix client run build",
+    "build:server": "npm --prefix server run build",
+    "build": "npm run build:client && npm run build:server",
+    "install:all": "npm install --prefix client && npm install --prefix server"
+  },
+  "engines": {
+    "node": ">=20"
+  }
 }
